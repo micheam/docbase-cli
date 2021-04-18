@@ -53,5 +53,8 @@ help, h  Shows a list of commands or help for one command
 --version, -v         print the version (default: false)
 ```
 
+## License
+[MIT](./LICENSE)
+
 ## Author
 Michito Maeda <https://github.com/micheam>

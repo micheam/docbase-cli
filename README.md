@@ -12,7 +12,7 @@
 $ go install github.com/micheam/docbase-cli/cmd/docbase@latest
 ```
 
-(Go 1.15 以前) `go get` でリをインストール
+(Go 1.15 以前) `go get` でバイナリをインストール
 
 ```bash
 $ go get github.com/micheam/docbase-cli/...

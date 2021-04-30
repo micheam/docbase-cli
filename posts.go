@@ -121,6 +121,13 @@ type (
 	PostCollectionHandler func(ctx context.Context, ps []docbase.Post, m docbase.Meta) error
 )
 
+func OutputPostBody(out io.Writer) PostHandler {
+	return func(ctx context.Context, post docbase.Post) error {
+		_, err := fmt.Fprint(out, text.Dos2Unix(post.Body))
+		return err
+	}
+}
+
 func OutputPostDetail(out io.Writer, n int) PostHandler {
 	type M struct {
 		docbase.Post

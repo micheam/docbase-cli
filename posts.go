@@ -59,7 +59,7 @@ type ListPostsRequest struct {
 	Domain  string
 }
 
-func ListPosts(ctx context.Context, req ListPostsRequest, handle PostListHandler) error {
+func ListPosts(ctx context.Context, req ListPostsRequest, handle PostCollectionHandler) error {
 	param := url.Values{}
 	if req.Query != nil {
 		param.Add("q", *req.Query)
@@ -98,9 +98,7 @@ var DefaultPostOption = docbase.PostOption{
 	Groups: []int{},
 }
 
-type PostCreationResultHandler func(ctx context.Context, created *docbase.Post) error
-
-func CreatePost(ctx context.Context, req CreatePostRequest, handler PostCreationResultHandler) error {
+func CreatePost(ctx context.Context, req CreatePostRequest, handler PostHandler) error {
 	opt := DefaultPostOption
 	if req.Option != nil {
 		opt = *req.Option
@@ -109,7 +107,7 @@ func CreatePost(ctx context.Context, req CreatePostRequest, handler PostCreation
 	if err != nil {
 		return fmt.Errorf("failed to create new post: %w", err)
 	}
-	return handler(ctx, created)
+	return handler(ctx, *created)
 }
 
 func marshal(v interface{}) string {
@@ -119,8 +117,8 @@ func marshal(v interface{}) string {
 
 // define ResultHandlers
 type (
-	PostHandler     func(ctx context.Context, p docbase.Post) error
-	PostListHandler func(ctx context.Context, ps []docbase.Post, m docbase.Meta) error
+	PostHandler           func(ctx context.Context, p docbase.Post) error
+	PostCollectionHandler func(ctx context.Context, ps []docbase.Post, m docbase.Meta) error
 )
 
 func WritePost(out io.Writer, n int) PostHandler {
@@ -173,10 +171,10 @@ Showed {{len .Lines}} of {{.Total}}
 	}
 }
 
-func BuildListResultHandler(withMeta bool) (PostListHandler, error) {
+func BuildPostCollectionHandler(withMeta bool) (PostCollectionHandler, error) {
 	const _tmplPostsList = `{{range .}}{{printf "%d\t%s" .ID (summary .)}}{{"\n"}}{{end}}`
 	tmplPostsList, err := template.New("list-posts").Funcs(template.FuncMap{
-		"summary": summary,
+		"summary": summarizePost,
 	}).Parse(_tmplPostsList)
 	if err != nil {
 		return nil, err
@@ -203,7 +201,8 @@ Total: {{.Total}}
 	}, nil
 }
 
-func summary(post docbase.Post) string {
+// メモを要約した文字列を生成する
+func summarizePost(post docbase.Post) string {
 	sb := new(strings.Builder)
 	var prefixed bool
 	if post.Archived {

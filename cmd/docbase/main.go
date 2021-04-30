@@ -149,7 +149,7 @@ var listPosts = &cli.Command{
 		if c.Int("per-page") != 0 {
 			req.PerPage = pointer.IntPtr(c.Int("per-page"))
 		}
-		presenter, err := docbasecli.BuildListResultHandler(c.Bool("meta"))
+		presenter, err := docbasecli.BuildPostCollectionHandler(c.Bool("meta"))
 		if err != nil {
 			return err
 		}
@@ -220,7 +220,7 @@ var newPost = &cli.Command{
 			req.Body = bytes.NewReader(b)
 		}
 
-		presenter := func(ctx context.Context, post *docbase.Post) error {
+		presenter := func(ctx context.Context, post docbase.Post) error {
 			fmt.Println(post.URL)
 			return nil
 		}

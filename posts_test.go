@@ -96,7 +96,7 @@ func Test_postSummaryaaa(t *testing.T) {
 			{Name: "tag-A"}, {Name: "tag-B"}, {Name: "tag-C"},
 		},
 	}
-	got := summary(post)
+	got := summarizePost(post)
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("postSummary mismatch (-want, +got):%s\n", diff)
 	}
@@ -108,7 +108,7 @@ func Test_postSummary_emptyTags(t *testing.T) {
 		Title: "Titile of post",
 		Tags:  nil,
 	}
-	got := summary(post)
+	got := summarizePost(post)
 	if diff := cmp.Diff(want, got); diff != "" {
 		t.Errorf("postSummary mismatch (-want, +got):%s\n", diff)
 	}
@@ -191,7 +191,7 @@ func Test_postSummary(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := summary(tt.post)
+			got := summarizePost(tt.post)
 			if diff := cmp.Diff(tt.want, got); diff != "" {
 				t.Errorf("postSummary mismatch (-want, +got):%s\n", diff)
 			}

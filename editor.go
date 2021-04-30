@@ -1,14 +1,19 @@
-package terminal
+package docbasecli
 
 // The original implementation can be found below.
 // https://samrapdev.com/capturing-sensitive-input-with-editor-in-golang-from-the-cli/
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
 	"os/exec"
+	"runtime"
 	"strings"
+
+	"github.com/micheam/go-docbase"
 )
 
 // DefaultEditor is vim because we're adults ;)
@@ -90,4 +95,26 @@ func CaptureInputFromEditor(resolveEditor PreferredEditorResolver, value []byte)
 		return []byte{}, err
 	}
 	return bytes, nil
+}
+
+func OpenBrowser(_ context.Context, post docbase.Post) error {
+	openbrowser(post.URL)
+	return nil
+}
+
+func openbrowser(url string) {
+	var err error
+	switch runtime.GOOS {
+	case "linux":
+		err = exec.Command("xdg-open", url).Start()
+	case "windows":
+		err = exec.Command("rundll32", "url.dll,FileProtocolHandler", url).Start()
+	case "darwin":
+		err = exec.Command("open", url).Start()
+	default:
+		err = fmt.Errorf("unsupported platform")
+	}
+	if err != nil {
+		log.Fatal(err)
+	}
 }

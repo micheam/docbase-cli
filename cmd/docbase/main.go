@@ -11,10 +11,8 @@ import (
 	"strings"
 	"time"
 
+	docbasecli "github.com/micheam/docbase-cli"
 	"github.com/micheam/docbase-cli/pointer"
-	"github.com/micheam/docbase-cli/post"
-	"github.com/micheam/docbase-cli/tag"
-	"github.com/micheam/docbase-cli/terminal"
 	"github.com/micheam/go-docbase"
 	"github.com/urfave/cli/v2"
 )
@@ -97,15 +95,15 @@ var viewPost = &cli.Command{
 		if err != nil {
 			return err
 		}
-		req := post.GetRequest{
+		req := docbasecli.GetPostRequest{
 			Domain: c.String("domain"),
 			ID:     postID,
 		}
-		var handle = post.WritePost(os.Stdout, c.Int("lines"))
+		var handle = docbasecli.WritePost(os.Stdout, c.Int("lines"))
 		if c.Bool("web") {
-			handle = post.OpenBrowser
+			handle = docbasecli.OpenBrowser
 		}
-		return post.Get(c.Context, req, handle)
+		return docbasecli.GetPost(c.Context, req, handle)
 	},
 }
 
@@ -141,7 +139,7 @@ var listPosts = &cli.Command{
 		if c.Bool("verbose") {
 			log.SetOutput(os.Stderr)
 		}
-		req := post.ListRequest{Domain: c.String("domain")}
+		req := docbasecli.ListPostsRequest{Domain: c.String("domain")}
 		if c.String("query") != "" {
 			req.Query = pointer.StringPtr(c.String("query"))
 		}
@@ -151,11 +149,11 @@ var listPosts = &cli.Command{
 		if c.Int("per-page") != 0 {
 			req.PerPage = pointer.IntPtr(c.Int("per-page"))
 		}
-		presenter, err := post.BuildListResultHandler(c.Bool("meta"))
+		presenter, err := docbasecli.BuildListResultHandler(c.Bool("meta"))
 		if err != nil {
 			return err
 		}
-		return post.List(c.Context, req, presenter)
+		return docbasecli.ListPosts(c.Context, req, presenter)
 	},
 }
 
@@ -195,7 +193,7 @@ var newPost = &cli.Command{
 		if c.Bool("verbose") {
 			log.SetOutput(os.Stderr)
 		}
-		req := post.CreateRequest{
+		req := docbasecli.CreatePostRequest{
 			Title:  c.String("title"),
 			Domain: c.String("domain"),
 		}
@@ -212,8 +210,8 @@ var newPost = &cli.Command{
 			defer func() { _ = file.Close() }()
 			req.Body = file
 		} else {
-			b, err := terminal.CaptureInputFromEditor(
-				terminal.GetPreferredEditorFromEnvironment,
+			b, err := docbasecli.CaptureInputFromEditor(
+				docbasecli.GetPreferredEditorFromEnvironment,
 				nil,
 			)
 			if err != nil {
@@ -226,7 +224,7 @@ var newPost = &cli.Command{
 			fmt.Println(post.URL)
 			return nil
 		}
-		return post.Create(c.Context, req, presenter)
+		return docbasecli.CreatePost(c.Context, req, presenter)
 	},
 }
 
@@ -267,7 +265,7 @@ var editPost = &cli.Command{
 		if err != nil {
 			return fmt.Errorf("illegal post id: %w", err)
 		}
-		req := post.UpdateRequest{
+		req := docbasecli.UpdatePostRequest{
 			Domain: c.String("domain"),
 			ID:     id,
 		}
@@ -275,7 +273,7 @@ var editPost = &cli.Command{
 		// Get existing post
 		var existing docbase.Post
 		{
-			r := post.GetRequest{
+			r := docbasecli.GetPostRequest{
 				Domain: c.String("domain"),
 				ID:     id,
 			}
@@ -283,7 +281,7 @@ var editPost = &cli.Command{
 				existing = post
 				return nil
 			}
-			err := post.Get(c.Context, r, h)
+			err := docbasecli.GetPost(c.Context, r, h)
 			if err != nil {
 				return fmt.Errorf("faild to get existing post(%d): %w", id, err)
 			}
@@ -301,8 +299,8 @@ var editPost = &cli.Command{
 			defer func() { _ = file.Close() }()
 			req.Body = file
 		} else {
-			b, err := terminal.CaptureInputFromEditor(
-				terminal.GetPreferredEditorFromEnvironment,
+			b, err := docbasecli.CaptureInputFromEditor(
+				docbasecli.GetPreferredEditorFromEnvironment,
 				[]byte(existing.Body),
 			)
 			if err != nil {
@@ -315,7 +313,7 @@ var editPost = &cli.Command{
 			fmt.Println(post.URL)
 			return nil
 		}
-		return post.Upate(c.Context, req, h)
+		return docbasecli.UpatePost(c.Context, req, h)
 	},
 }
 
@@ -327,7 +325,7 @@ var tags = &cli.Command{
 		if c.Bool("verbose") {
 			log.SetOutput(os.Stderr)
 		}
-		req := tag.ListRequest{
+		req := docbasecli.ListTagsRequest{
 			Domain: c.String("domain"),
 		}
 		presenter := func(ctx context.Context, tags []docbase.Tag) error {
@@ -336,6 +334,6 @@ var tags = &cli.Command{
 			}
 			return nil
 		}
-		return tag.List(c.Context, req, presenter)
+		return docbasecli.ListTags(c.Context, req, presenter)
 	},
 }

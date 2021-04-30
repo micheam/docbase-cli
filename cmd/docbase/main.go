@@ -99,7 +99,7 @@ var viewPost = &cli.Command{
 			Domain: c.String("domain"),
 			ID:     postID,
 		}
-		var handle = docbasecli.WritePost(os.Stdout, c.Int("lines"))
+		var handle = docbasecli.OutputPostDetail(os.Stdout, c.Int("lines"))
 		if c.Bool("web") {
 			handle = docbasecli.OpenBrowser
 		}

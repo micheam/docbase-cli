@@ -41,9 +41,9 @@ tags:
 	}
 }
 
-func Test_WritePost(t *testing.T) {
+func Test_OutputPostDetail(t *testing.T) {
 	var buf = new(bytes.Buffer)
-	sut := WritePost(buf, 5)
+	sut := OutputPostDetail(buf, 5)
 	ctx := context.Background()
 	post := docbase.Post{
 		ID:        11111,

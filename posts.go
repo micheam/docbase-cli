@@ -121,7 +121,7 @@ type (
 	PostCollectionHandler func(ctx context.Context, ps []docbase.Post, m docbase.Meta) error
 )
 
-func WritePost(out io.Writer, n int) PostHandler {
+func OutputPostDetail(out io.Writer, n int) PostHandler {
 	type M struct {
 		docbase.Post
 		Total int

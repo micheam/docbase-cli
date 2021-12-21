@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -217,9 +218,14 @@ var newPost = &cli.Command{
 			defer func() { _ = file.Close() }()
 			req.Body = file
 		} else {
+			file, err := ioutil.TempFile(os.TempDir(), "*.md")
+			if err != nil {
+				return err
+			}
+			defer func() { _ = os.Remove(file.Name()) }()
 			b, err := docbasecli.CaptureInputFromEditor(
 				docbasecli.GetPreferredEditorFromEnvironment,
-				nil,
+				file,
 			)
 			if err != nil {
 				return fmt.Errorf("faild to capture input: %w", err)
@@ -306,9 +312,19 @@ var editPost = &cli.Command{
 			defer func() { _ = file.Close() }()
 			req.Body = file
 		} else {
+			file, err := ioutil.TempFile(os.TempDir(), "*.md")
+			if err != nil {
+				return err
+			}
+			defer func() { _ = os.Remove(file.Name()) }()
+			i, err := file.Write([]byte(existing.Body))
+			if err != nil {
+				return err
+			}
+			log.Printf("write %d bytes of default value", i)
 			b, err := docbasecli.CaptureInputFromEditor(
 				docbasecli.GetPreferredEditorFromEnvironment,
-				[]byte(existing.Body),
+				file,
 			)
 			if err != nil {
 				return fmt.Errorf("faild to capture input: %w", err)

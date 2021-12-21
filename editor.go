@@ -66,28 +66,11 @@ func OpenFileInEditor(filename string, resolveEditor PreferredEditorResolver) er
 // CaptureInputFromEditor opens a temporary file in a text editor and returns
 // the written bytes on success or an error on failure. It handles deletion
 // of the temporary file behind the scenes.
-//
-// TODO(micheam): tempfile は外部から受け取るべき（内部でつくるとテストできない）
-func CaptureInputFromEditor(resolveEditor PreferredEditorResolver, value []byte) ([]byte, error) {
-	file, err := ioutil.TempFile(os.TempDir(), "*.md")
-	if err != nil {
+func CaptureInputFromEditor(resolveEditor PreferredEditorResolver, file *os.File) ([]byte, error) {
+	if err := file.Close(); err != nil {
 		return []byte{}, err
 	}
-	defer func() { _ = os.Remove(file.Name()) }()
-
-	// Edit(micheam): enable to specify, default value
-	if len(value) > 0 {
-		i, err := file.Write(value)
-		if err != nil {
-			return []byte{}, err
-		}
-		log.Printf("write %d bytes of default value", i)
-	}
-
-	if err = file.Close(); err != nil {
-		return []byte{}, err
-	}
-	if err = OpenFileInEditor(file.Name(), resolveEditor); err != nil {
+	if err := OpenFileInEditor(file.Name(), resolveEditor); err != nil {
 		return []byte{}, err
 	}
 	bytes, err := ioutil.ReadFile(file.Name())

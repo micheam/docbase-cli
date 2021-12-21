@@ -218,14 +218,14 @@ var newPost = &cli.Command{
 			defer func() { _ = file.Close() }()
 			req.Body = file
 		} else {
-			file, err := ioutil.TempFile(os.TempDir(), "*.md")
+			tempfile, err := ioutil.TempFile(os.TempDir(), "*.md")
 			if err != nil {
 				return err
 			}
-			defer func() { _ = os.Remove(file.Name()) }()
+			defer func() { _ = os.Remove(tempfile.Name()) }()
 			b, err := docbasecli.CaptureInputFromEditor(
 				docbasecli.GetPreferredEditorFromEnvironment,
-				file,
+				tempfile,
 			)
 			if err != nil {
 				return fmt.Errorf("faild to capture input: %w", err)
@@ -312,19 +312,21 @@ var editPost = &cli.Command{
 			defer func() { _ = file.Close() }()
 			req.Body = file
 		} else {
-			file, err := ioutil.TempFile(os.TempDir(), "*.md")
+			// TODO(micheam): Cut it out to a function and test it
+			dir := os.Getenv("DOCBASE_TEMP_DIR")
+			tempfile, err := ioutil.TempFile(dir, fmt.Sprintf("%010d.*.md", id))
 			if err != nil {
 				return err
 			}
-			defer func() { _ = os.Remove(file.Name()) }()
-			i, err := file.Write([]byte(existing.Body))
+			defer func() { _ = os.Remove(tempfile.Name()) }()
+			i, err := tempfile.Write([]byte(existing.Body))
 			if err != nil {
 				return err
 			}
 			log.Printf("write %d bytes of default value", i)
 			b, err := docbasecli.CaptureInputFromEditor(
 				docbasecli.GetPreferredEditorFromEnvironment,
-				file,
+				tempfile,
 			)
 			if err != nil {
 				return fmt.Errorf("faild to capture input: %w", err)

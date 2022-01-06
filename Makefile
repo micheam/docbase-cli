@@ -2,10 +2,10 @@ TARGET = docbase
 REV_PARSE = git rev-parse --short HEAD
 BIN_DIR = 
 
-$(TARGET) : cmd/$(TARGET)/main.go
+$(TARGET) : clean cmd/$(TARGET)/main.go
 	@go build -ldflags "-X main.Githash=`$(REV_PARSE)`" -o ./bin/$(TARGET) ./cmd/$(TARGET)
 
-.PHONY: claen
+.PHONY: clean
 clean :
 	@rm -f ./bin/$(TARGET)
 
@@ -14,5 +14,5 @@ test :
 	@go test ./...
 
 .PHONY: install
-install : $(TARGET)
-	@cp ./bin/$(TARGET) $(GOBIN)/$(TARGET)
+install : test $(TARGET)
+	@cp ./bin/$(TARGET) $(GOBIN)

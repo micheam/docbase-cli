@@ -6,7 +6,7 @@ require (
 	github.com/google/go-cmp v0.5.6
 	github.com/mattn/go-isatty v0.0.14
 	github.com/micheam/go-docbase v0.0.0-20210416150124-4da631f57116
-	github.com/pelletier/go-toml v1.9.0
+	github.com/pelletier/go-toml v1.9.4
 	github.com/urfave/cli/v2 v2.3.0
 	gopkg.in/yaml.v2 v2.4.0
 )
